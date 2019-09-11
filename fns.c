@@ -51,6 +51,11 @@ initui(UIface* ui, Display* display, Image* spritesheet){
 	uint i;
 	ui->viewport = allocimage(display, Rect(0,0,DSTATUSLX, DSTATUSLY), RGBA32, 0, DTransparent);
 	draw(ui->viewport, Rect(-DSTATUSX, -DSTATUSY,DSTATUSLX, DSTATUSLY), spritesheet, nil, ZP);
+	ui->vpoff->xoff = 0;
+	ui->vpoff->yoff = 0;
+	ui->vpoff->end = 0;
+	ui->etd = 0x701;
+	
 	for(i=0;i<7;++i){
 		/*Init endpoints*/
 		if(i<3){
@@ -69,6 +74,12 @@ initui(UIface* ui, Display* display, Image* spritesheet){
 
 
 
+
+
+}
+
+void
+drawui(UIface* ui, Image* screen){
 
 
 }

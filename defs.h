@@ -52,8 +52,9 @@ enum {
 	
 };
 struct UIface {
+
+	uint etd;
 	Image* viewport;
 	Image* pip[7];
-	Image* end[3];
+ 	Image* end[3];
 };
-

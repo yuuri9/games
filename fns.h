@@ -16,3 +16,7 @@ save(Biobuf* savfile, Settings* Settings);
 
 void
 initui(UIface* ui, Display* display, Image* spritesheet);
+
+void
+drawui(UIface* ui, Image* screen);
+
