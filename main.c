@@ -107,7 +107,7 @@ main(int argc, char** argv){
 
 		}
 
-		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.min.x+DSTATUSLX, screen->r.min.x+DSTATUSY ),UIface.viewport,nil,ZP);
+		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.min.x + DSTATUSLX, screen->r.min.y + DSTATUSLY ),UIface.viewport,nil,ZP);
 
 		draw(screen, Rect(screen->r.min.x + 17, screen->r.min.y + 15, screen->r.min.x + 49, screen->r.min.y + 47), GStack[0].tile, nil, ZP);
 
