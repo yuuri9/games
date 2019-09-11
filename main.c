@@ -113,9 +113,9 @@ main(int argc, char** argv){
 
 		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 4, screen->r.min.x + DSTATUSLX + 1 + DPIPLX, screen->r.min.y + 4 + DPIPLY), UIface.pip[0], nil, ZP);
 
-		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1, screen->r.min.y + 2, screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1 + DENDX, screen->r.min.y + 2 + DENDYL ), UIface.end[0], nil, ZP);
-		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2 + DENDYL , screen->r.min.x + 2 + DSTATUSLX + 1 + DENDXL, screen->r.min.y  + DENDYL + DENDYL), UIface.end[1], nil, ZP);
-		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2  + DENDYL + DENDYL, screen->r.min.x + DSTATUSLX + 1 + DENDXL, screen->r.min.y + 2 + DENDYL + DENDYL + DENDYL), UIface.end[2], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1, screen->r.min.y + 2, screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1 + DENDX, screen->r.min.y + 2 + DENDLY ), UIface.end[0], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2 + DENDLY , screen->r.min.x + 2 + DSTATUSLX + 1 + DENDLX, screen->r.min.y  + DENDLY + DENDLY), UIface.end[1], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2  + DENDLY + DENDLY, screen->r.min.x + DSTATUSLX + 1 + DENDLX, screen->r.min.y + 2 + DENDLY + DENDLY + DENDLY), UIface.end[2], nil, ZP);
 
 
 		/*This blocks*/

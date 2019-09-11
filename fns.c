@@ -54,8 +54,8 @@ initui(UIface* ui, Display* display, Image* spritesheet){
 	for(i=0;i<7;++i){
 		/*Init endpoints*/
 		if(i<3){
-			ui->end[i] = allocimage(display, Rect(0,0,DENDXL, DENDYL), RGBA32, 0, DTransparent);
-			draw(ui->end[i], Rect(-DENDX, -DRENDY - (i * (DBENDY - DRENDY)), DENDXL, DENDYL), spritesheet, nil, ZP);
+			ui->end[i] = allocimage(display, Rect(0,0,DENDLX, DENDLY), RGBA32, 0, DTransparent);
+			draw(ui->end[i], Rect(-DENDX, -DRENDY - (i * (DBENDY - DRENDY)), DENDLX, DENDLY), spritesheet, nil, ZP);
 		}
 		ui->pip[i] = allocimage(display, Rect(0,0,DPIPLX, DPIPLY), RGBA32, 0, DTransparent);
 	}

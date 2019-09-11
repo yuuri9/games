@@ -45,8 +45,8 @@ enum {
 	DPIPL2Y = 12,
 	DENDX = 551,
 	DRENDY = 182,
-	DENDXL = 32,
-	DENDYL = 20,
+	DENDLX = 32,
+	DENDLY = 20,
 	DBENDY = 202,
 	DGENDY = 222,
 	
