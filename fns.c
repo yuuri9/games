@@ -77,6 +77,12 @@ initui(UIface* ui, Display* display, Image* spritesheet){
 
 void
 drawui(UIface* ui, Image* screen){
+		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.min.x + DSTATUSLX, screen->r.min.y + DSTATUSLY ),ui->viewport,nil,ZP);
 
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 4, screen->r.min.x + DSTATUSLX + 1 + DPIPLX, screen->r.min.y + 4 + DPIPLY), ui->pip[0], nil, ZP);
+
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1, screen->r.min.y + 2, screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1 + DENDX, screen->r.min.y + 2 + DENDLY ), ui->end[0], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2 + DENDLY , screen->r.min.x + 2 + DSTATUSLX + 1 + DENDLX, screen->r.min.y  + DENDLY + DENDLY), ui->end[1], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2  + DENDLY + DENDLY, screen->r.min.x + DSTATUSLX + 1 + DENDLX, screen->r.min.y + 2 + DENDLY + DENDLY + DENDLY), ui->end[2], nil, ZP);
 
 }
