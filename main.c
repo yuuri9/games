@@ -15,6 +15,7 @@ main(int argc, char** argv){
 	Event Event;
 	ulong Key;
 	uint i,j,k,l,m;
+	uint gclock;
 	int ifd;
 	ulong trate = 20;
 	ulong Etimer = 8;
@@ -25,13 +26,10 @@ main(int argc, char** argv){
 	Image* tile;
 	Image* interface;
 
-	Image* uiblk;
-	Image* uiport;
-	Image* uiend[3];
-	Image* pipnl;
-
 	char* filename = 0;
 	Biobuf* savfile;
+
+	UIface UIface;
 
 	DTile* GStack = (DTile*)calloc(100, sizeof(DTile));
 
@@ -63,12 +61,10 @@ main(int argc, char** argv){
 	}
 
 	bground = allocimagemix(display, DPaleyellow, DDarkgreen);
+
 	tile = allocimage(display,Rect(0,0,32,32),RGBA32,0,DTransparent);
-	uiblk = allocimage(display,Rect(0,0,32,32),RGBA32,0,DTransparent);
-	uiport = allocimage(display, Rect(0,0,85,65),RGBA32,0,DTransparent);
-	for(i=0;i<3;++i)
-		uiend[i] = allocimage(display,Rect(0,0,33,21), RGBA32, 0,DTransparent);
-	pipnl = allocimage(display, Rect(0,0,8,32), RGBA32,0,DTransparent);
+	
+ 
 
 	if((savfile= Bopen(filename, OREAD)) != 0){
  		if(loadsave(&Settings, savfile) == 0)
@@ -95,19 +91,14 @@ main(int argc, char** argv){
 		exits("readimage error");
 	close(ifd);
 
-
-	draw(uiport, Rect((1 - DSTATUSX), (1 - DSTATUSY), 85,65), interface, nil, ZP);
-	draw(uiend[0], Rect(1 - DRENDX, 1- DRENDY, 33,21), interface, nil, ZP);
-	draw(uiend[1], Rect(1 - DRENDX, 1- 202, 33,21), interface, nil, ZP);
-	draw(uiend[2], Rect(1 - DRENDX, 1- 222, 33,21), interface, nil, ZP);
-
-	draw(pipnl, Rect((1 - (DSTATUSX + 85)), (1 - DSTATUSY), 8,32), interface, nil, ZP);
-
+	initui(&UIface, display, interface);
+	
 	einit(Ekeyboard|Emouse);
 	etimer(Etimer, trate);
 
-	for(k=0;;){
+	for(k=0,gclock=0;++gclock;){
 		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.max.x, screen->r.max.y), bground, nil, ZP);
+
 		if(k>=100){
 			for(i=0;i<k;++i){
 				draw(screen, Rect(screen->r.min.x + GStack[i].offx, screen->r.min.y + GStack[i].offy, screen->r.min.x + GStack[i].offx + 32, screen->r.min.y + GStack[i].offy  + 32), GStack[i].tile, nil, ZP);
@@ -115,15 +106,16 @@ main(int argc, char** argv){
 			}
 
 		}
-		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.min.x + 85, screen->r.min.y + 65),uiport,nil,ZP);
+
+		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.min.x+DSTATUSLX, screen->r.min.x+DSTATUSY ),UIface.viewport,nil,ZP);
 
 		draw(screen, Rect(screen->r.min.x + 17, screen->r.min.y + 15, screen->r.min.x + 49, screen->r.min.y + 47), GStack[0].tile, nil, ZP);
 
-		draw(screen, Rect(screen->r.min.x + 85 , screen->r.min.y , screen->r.min.x + 85 +8, screen->r.min.y + 32), pipnl, nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 4, screen->r.min.x + DSTATUSLX + 1 + DPIPLX, screen->r.min.y + 4 + DPIPLY), UIface.pip[0], nil, ZP);
 
-		draw(screen, Rect(screen->r.min.x + 85 + 8, screen->r.min.y + 2, screen->r.min.x + 85 + 33 + 8, screen->r.min.y + 22), uiend[0], nil, ZP);
-		draw(screen, Rect(screen->r.min.x + 85, screen->r.min.y +22, screen->r.min.x + 85 + 33, screen->r.min.y + 43), uiend[1], nil, ZP);
-		draw(screen, Rect(screen->r.min.x + 85, screen->r.min.y+42, screen->r.min.x + 85 + 33, screen->r.min.y + 63), uiend[2], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1, screen->r.min.y + 2, screen->r.min.x + DSTATUSLX + 1 + DPIPLX + 1 + DENDX, screen->r.min.y + 2 + DENDYL ), UIface.end[0], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2 + DENDYL , screen->r.min.x + 2 + DSTATUSLX + 1 + DENDXL, screen->r.min.y  + DENDYL + DENDYL), UIface.end[1], nil, ZP);
+		draw(screen, Rect(screen->r.min.x + DSTATUSLX + 1, screen->r.min.y + 2  + DENDYL + DENDYL, screen->r.min.x + DSTATUSLX + 1 + DENDXL, screen->r.min.y + 2 + DENDYL + DENDYL + DENDYL), UIface.end[2], nil, ZP);
 
 
 		/*This blocks*/

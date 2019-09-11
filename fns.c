@@ -46,3 +46,29 @@ loadsave(Settings* Settings, Biobuf* savfile){
 	}
 	return 0;
 }
+void
+initui(UIface* ui, Display* display, Image* spritesheet){
+	uint i;
+	ui->viewport = allocimage(display, Rect(0,0,DSTATUSLX, DSTATUSLY), RGBA32, 0, DTransparent);
+	draw(ui->viewport, Rect(-DSTATUSX, -DSTATUSY,DSTATUSLX, DSTATUSLY), spritesheet, nil, ZP);
+	for(i=0;i<7;++i){
+		/*Init endpoints*/
+		if(i<3){
+			ui->end[i] = allocimage(display, Rect(0,0,DENDXL, DENDYL), RGBA32, 0, DTransparent);
+			draw(ui->end[i], Rect(-DENDX, -DRENDY - (i * (DBENDY - DRENDY)), DENDXL, DENDYL), spritesheet, nil, ZP);
+		}
+		ui->pip[i] = allocimage(display, Rect(0,0,DPIPLX, DPIPLY), RGBA32, 0, DTransparent);
+	}
+	draw(ui->pip[0], Rect(-DPIPX, -DPIPY, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[1], Rect(-DPIP2X, -DPIP2Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[2], Rect(-DPIP3X, -DPIP3Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[3], Rect(-DPIP4X, -DPIP4Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[4], Rect(-DPIP5X, -DPIP5Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[5], Rect(-DPIP6X, -DPIP6Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+	draw(ui->pip[6], Rect(-DPIP7X, -DPIP7Y, DPIPLX, DPIPLY), spritesheet, nil, ZP);
+
+
+
+
+
+}

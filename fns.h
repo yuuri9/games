@@ -14,3 +14,5 @@ loadsave( Settings* Settings, Biobuf* savfile);
 void
 save(Biobuf* savfile, Settings* Settings);
 
+void
+initui(UIface* ui, Display* display, Image* spritesheet);
