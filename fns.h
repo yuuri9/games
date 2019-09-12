@@ -18,5 +18,10 @@ void
 initui(UIface* ui, Display* display, Image* spritesheet);
 
 void
-drawui(UIface* ui, Image* screen);
+drawui(UIface* ui, Image* screen, GEntity* entity,uint xoff,uint yoff);
 
+void
+initentity(GEntity* entity, uint type, uint mhp, uint mmp, uint mexp, Image* spritesheet, Display* display);
+
+void
+drawentity(GEntity* entity, Image* screen, uint xoff, uint yoff);

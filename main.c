@@ -31,8 +31,7 @@ main(int argc, char** argv){
 
 	UIface UIface;
 
-	DTile* GStack = (DTile*)calloc(100, sizeof(DTile));
-
+	GEntity GEntity;
 
 	Settings.seed = 0;
 	/*PRECEDENCE: File seed overwrites cli seed*/
@@ -93,22 +92,18 @@ main(int argc, char** argv){
 
 	initui(&UIface, display, interface);
 	
+
 	einit(Ekeyboard|Emouse);
 	etimer(Etimer, trate);
 
-	for(k=0,gclock=0;++gclock;){
+ 	initentity(&GEntity, 240, 2, 2, 2, tileset, display);
+ 
+	for(gclock=0;++gclock;){
 		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.max.x, screen->r.max.y), bground, nil, ZP);
-
-		if(k>=100){
-			for(i=0;i<k;++i){
-				draw(screen, Rect(screen->r.min.x + GStack[i].offx, screen->r.min.y + GStack[i].offy, screen->r.min.x + GStack[i].offx + 32, screen->r.min.y + GStack[i].offy  + 32), GStack[i].tile, nil, ZP);
-
-			}
-
-		}
-
-		drawui(&UIface, screen);
-		draw(screen, Rect(screen->r.min.x + 17, screen->r.min.y + 15, screen->r.min.x + 49, screen->r.min.y + 47), GStack[0].tile, nil, ZP);
+ 		drawentity(&GEntity, screen, 128, 128);
+ 
+		drawui(&UIface, screen, &GEntity, 0 , 0);
+		/*draw(screen, Rect(screen->r.min.x + 17, screen->r.min.y + 15, screen->r.min.x + 49, screen->r.min.y + 47), GStack[0].tile, nil, ZP);*/
 
 
 
@@ -127,28 +122,22 @@ main(int argc, char** argv){
 				}
 
 			}
+			if(Event.kbdc == 'E' || Event.kbdc == 'e'){
+				++GEntity.hp;
+				++GEntity.mhp;
+				++GEntity.mp;
+				++GEntity.mmp;
+				++GEntity.exp;
+				++GEntity.mexp;
+			}
 
 
 		}
 		if(Key == Etimer){
-			if(k<100){
-				i = ((rand() ) % (screen->r.max.x - screen->r.min.x - 32));
-				j = ((rand() ) % (screen->r.max.y - screen->r.min.y - 32));
 
+		}
+		if(Key == Emouse){
 
-				l = ((rand()*32) % tileset->r.max.x);
-				m = ((rand()*32) % tileset->r.max.y);
-
-				draw(tile, Rect(tile->r.min.x - l, tile->r.min.y - m,32,32), tileset, nil, ZP);
-				GStack[k].tile = tile;
-				GStack[k].offx = i;
-				GStack[k].offy = j;
- 	
-				tile = allocimage(display,Rect(0,0,32,32),RGBA32,0,DTransparent);
- 
-
-				++k;
-			}
 		}
 
 
