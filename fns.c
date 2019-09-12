@@ -128,17 +128,31 @@ drawui(UIface* ui, Image* screen, GEntity* entity, uint xoff,uint yoff){
 		draw(screen, Rect(screen->r.min.x +xoff, screen->r.min.y +yoff, screen->r.min.x +xoff + DSTATUSLX, screen->r.min.y +yoff + DSTATUSLY ),ui->viewport,nil,ZP);
 
 		for(i=0;i<entity->mhp;++i){
-			draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 4, screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i), screen->r.min.y +yoff + 6 + DPIPLY), i<entity->hp?ui->pip[1]:ui->pip[0], nil, ZP);
+			draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff +4 , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i), screen->r.min.y +yoff + 4 + DPIPLY), ui->pip[0], nil, ZP);
+			if( i<(entity->hp)){
+				draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 6, screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i), screen->r.min.y +yoff + 6 + DPIPLY),ui->pip[1], nil, ZP);
+			}
+
+
 		}
-		draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX  + 1 + (DPIPLX * i), screen->r.min.y +yoff + 2, screen->r.min.x +xoff + DSTATUSLX + DPIPLX + 1 + DENDLX + (DPIPLX * i), screen->r.min.y +yoff + 2 + DENDLY ), ui->end[0], nil, ZP);
+		draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX   + (DPIPLX * i), screen->r.min.y +yoff + 2, screen->r.min.x +xoff + DSTATUSLX + DPIPLX  + DENDLX + (DPIPLX * i), screen->r.min.y +yoff + 2 + DENDLY ), ui->end[0], nil, ZP);
 
 		for(i=0;i<entity->mmp;++i){
-			draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 4 + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 4 + DPIPLY + DPIPLY), i<entity->mp?ui->pip[3]:ui->pip[0], nil, ZP);
+				draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 8 + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 8 + DPIPLY + DPIPLY), ui->pip[0], nil, ZP);
+
+			if(i<entity->mp){
+				draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 9 + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 9 + DPIPLY + DPIPLY), ui->pip[3], nil, ZP);
+			}
 		}
 		draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 2 + DENDLY , screen->r.min.x +xoff + 4 + DSTATUSLX + DENDLX + (DPIPLX * i), screen->r.min.y +yoff + 6 + DENDLY + DENDLY), ui->end[1], nil, ZP);
 		
 		for(i=0;i<entity->mexp;++i){
-			draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i),  screen->r.min.y +yoff + 4  + DPIPLY + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 6  + DPIPLY + DPIPLY + DPIPLY ), i<entity->exp?ui->pip[5]:ui->pip[0], nil, ZP);
+
+			draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i),  screen->r.min.y +yoff + 12  + DPIPLY + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 12  + DPIPLY + DPIPLY + DPIPLY ),ui->pip[0], nil, ZP);
+			if(i<entity->exp){
+		
+				draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i),  screen->r.min.y +yoff + 13  + DPIPLY + DPIPLY , screen->r.min.x +xoff + DSTATUSLX + DPIPLX + (DPIPLX * i),screen->r.min.y +yoff + 13  + DPIPLY + DPIPLY + DPIPLY ), ui->pip[5], nil, ZP);
+			}
 		}
 		draw(screen, Rect(screen->r.min.x +xoff + DSTATUSLX + (DPIPLX * i), screen->r.min.y +yoff + 2  + DENDLY + DENDLY, screen->r.min.x +xoff + DSTATUSLX + DENDLX + (DPIPLX * i), screen->r.min.y +yoff + 2 + DENDLY + DENDLY + DENDLY), ui->end[2], nil, ZP);
 

@@ -102,7 +102,7 @@ main(int argc, char** argv){
 		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.max.x, screen->r.max.y), bground, nil, ZP);
  		drawentity(&GEntity, screen, 128, 128);
  
-		drawui(&UIface, screen, &GEntity, 0 , 0);
+		drawui(&UIface, screen, &GEntity, 32 , 32);
 		/*draw(screen, Rect(screen->r.min.x + 17, screen->r.min.y + 15, screen->r.min.x + 49, screen->r.min.y + 47), GStack[0].tile, nil, ZP);*/
 
 
