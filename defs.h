@@ -5,9 +5,13 @@ typedef struct UIface UIface;
 typedef struct GEntity GEntity;
 typedef struct statmatrix statmatrix;
 typedef struct Item Item;
+typedef struct Player Player;
+
 
 struct Settings {
 	ulong seed;
+	ulong mapsize;
+	uint trate;
 };
 
 /*Demo, to be unused*/
@@ -17,11 +21,27 @@ struct DTile {
 	int offy;
 };
 
-struct Tile{
+struct Tile {
 	Image* gfx;
 	uint prop;
 	uint did;
+	ushort ie; /*|map for item or entity*/
+	Item* it;
+	GEntity* en;
+	/*Relative locations for server world, use map for client*/
+	Tile* north;
+	Tile* west;
+	Tile* east;
+	Tile* south;
+
 };
+
+struct Player{
+	GEntity* entities;
+	uint maphb;
+	Tile* base;
+};
+
 enum {
 	DSTATUSX = 448,
 	DSTATUSY = 180,
@@ -78,12 +98,15 @@ struct statmatrix{
 	uint matt;
 	uint melm;
 	uint melmp;
+	
+	ushort elmres[12];
 
 	/*Valid range bitmap & with distance*/
 	uint ran;
 	
 };
 struct GEntity {
+	Tile* pos;
 	uint spriten;
 	Image* sprites[4];
 	statmatrix stt;

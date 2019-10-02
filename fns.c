@@ -1,31 +1,39 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
-#include <event.h>
+#include <thread.h>
 #include <bio.h>
 
 #include "defs.h"
 #include "fns.h"
 
+
+
 void
 eresized(int New){
 	if(New && getwindow(display, Refmesg) < 0){
 		
-		exits("Getwindow Error");
+		threadexitsall("Getwindow Error");
 	}
 }
 
 void
 usage(void){
-	fprint(2, "game [-t] tickrate [-f] filename [-s] seed\n");
-	exits(nil);
+	fprint(2, "game [-t] tickrate [-f] filename [-s] seed -m mapsize\n");
+	threadexitsall(nil);
+}
+
+void
+susage(void){
+	fprint(2, "server [-p] playerdb [-w] world/ [-s] seed [-o] console \n");
+	threadexitsall(nil);
 }
 
 void
 quit(Biobuf* savfile, Settings* Settings){
 	
 	save(savfile, Settings);
-	exits(nil);
+	threadexitsall(nil);
 }
 
 /*You must open the file before every save and it will be closed in the process*/
@@ -121,6 +129,7 @@ drawentity(GEntity* entity,Image* screen, uint xoff, uint yoff){
 	}
 	/*We will have to add a draw-item loop too*/
 
+
 }
 void
 drawui(UIface* ui, Image* screen, GEntity* entity, uint xoff,uint yoff){
@@ -160,3 +169,5 @@ drawui(UIface* ui, Image* screen, GEntity* entity, uint xoff,uint yoff){
 		drawentity(entity, screen, 16 + xoff, 15 + yoff);
 
 }
+
+

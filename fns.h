@@ -1,5 +1,9 @@
+
 void
 usage(void);
+
+void
+susage(void);
 
 void
 eresized(int New);
@@ -25,3 +29,4 @@ initentity(GEntity* entity, uint type, uint mhp, uint mmp, uint mexp, Image* spr
 
 void
 drawentity(GEntity* entity, Image* screen, uint xoff, uint yoff);
+
