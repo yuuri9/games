@@ -19,7 +19,7 @@ eresized(int New){
 
 void
 usage(void){
-	fprint(2, "game [-t] tickrate [-f] filename [-s] seed -m mapsize\n");
+	fprint(2, "game [-k] [-t] tickrate [-f] filename [-s] seed [-m] mapsize\n");
 	threadexitsall(nil);
 }
 
@@ -100,20 +100,20 @@ initentity(GEntity* entity, uint type, uint mhp, uint mmp, uint mexp, Image* spr
 	entity->exp = 0;
 	entity->ares = 0;
 	entity->mares = 0;
-	entity->stt.wis = 0;
-	entity->stt.str = 0;
-	entity->stt.dex = 0;
-	entity->stt.itg = 0;
-	entity->stt.luk = 0;
-	entity->stt.spd = 0;
-	entity->stt.def = 0;
-	entity->stt.mdef = 0;
-	entity->stt.att = 0;
-	entity->stt.matt = 0;
-	entity->stt.aelm = 0;
-	entity->stt.aelmp = 0;
-	entity->stt.melm = 0;
-	entity->stt.melmp = 0;
+	entity->wis = 0;
+	entity->str = 0;
+	entity->dex = 0;
+	entity->itg = 0;
+	entity->luk = 0;
+	entity->spd = 0;
+	entity->def = 0;
+	entity->mdef = 0;
+	entity->att = 0;
+	entity->matt = 0;
+	entity->aelm = 0;
+	entity->aelmp = 0;
+	entity->melm = 0;
+	entity->melmp = 0;
  
 }
 

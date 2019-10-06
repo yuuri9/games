@@ -16,9 +16,14 @@ consfn(void* arg){
 
 		int p[2];
 		int consfd;
+		Channel* c;
 		Biobuf *console;
+
 		char* consfil;
-		consfil = (char*)arg;
+		c = arg;
+
+		consfil = (char*)recvp(c);
+
 		char* consinbuf;
 
 		pipe(p);
@@ -90,9 +95,16 @@ threadmain(int argc, char** argv){
 			break;
 	}ARGEND
 
-	proccreate(consfn,consfil, 2048 );
+	Alt a[] = {
+		{nil,nil,CHANRCV},
+		{nil,nil,CHANEND},
 
+	};
 
+	a[0].c = chancreate(sizeof(char*), 0);
+	proccreate(consfn,a[0].c, 2048 );
+
+	sendp(a[0].c, consfil);
 	
 
 }

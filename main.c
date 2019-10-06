@@ -20,11 +20,43 @@ utimer(void* arg){
 		sendul(c, 1);
 	}
 }
+void
+kbdfsio(void* arg){
+	Channel* c;
+	Biobuf* buf;
+	char* strn;
+	char* strpt;
+	uint strptn;
+	uint i;
+	uint t;
+	c = arg;
+	/*TODO, this can probably be implemented through a proxy program on linux/OSX, will need access to linux/OSX box to develop*/
+	buf = Bopen("/dev/kbd", OREAD);
 
+	/*The dance t does here is required since the first keydown sends both hit and repeat signal*/
+	for(i=0,strptn=0,t=0;;strn = Brdstr(buf, '\0', 1)){
+		if(Blinelen(buf) > 0 ){
+			if(strn[0] == 'k' || strn[0] == 'K'){
+				strpt = strn;
+				strptn = Blinelen(buf);
+				t = 0;
+			}
+			if(t==0 && strn[0] == 'c')
+				t = 1;
+			if(t == 1){
+				for(i=1;i<strptn;++i){
+					sendul(c, strpt[i]);
+				}
+			}
+		}
+	}
+
+}
 void
 threadmain(int argc, char** argv){
 
  	uint i,j,k,l,m;
+	uint diskbd;
 	uint gclock;
 
 	int ifd;
@@ -51,7 +83,7 @@ threadmain(int argc, char** argv){
 
 	/*PRECEDENCE: File seed overwrites cli seed*/
 	Settings.seed = 0;
-
+	diskbd = 0;
 
 
 	ARGBEGIN{
@@ -66,6 +98,9 @@ threadmain(int argc, char** argv){
 			break;
 		case 'm':
 			Settings.mapsize = strtoul(EARGF(usage()), nil, 10);
+			break;
+		case 'k':
+			diskbd = 1;
 			break;
 	}ARGEND
 
@@ -85,19 +120,33 @@ threadmain(int argc, char** argv){
 
 
 	mc = initmouse(nil, screen);
-	kc = initkeyboard(nil);
+	if(diskbd == 1 || (ifd = open("/dev/kbd", OREAD)) <= 0 ){
+		kc = initkeyboard(nil);
+		diskbd = 1;
+	}
+	else 
+		close(ifd);
 
 	Alt a[] = {
 		{mc->c, &Mouse, CHANRCV},
 		{mc->resizec, nil, CHANRCV},
-		{kc->c, &buf, CHANRCV},
+		{nil, &buf, CHANRCV},
 		{nil, &tick, CHANRCV},
 		{nil,nil,CHANEND},
 	};
 
+	if(diskbd == 1){
+		a[2].c = kc->c;
+	}
+
 	a[3].c = chancreate(sizeof(ulong), 0);
 	proccreate(utimer,a[3].c,2048);
- 
+
+ 	if(diskbd != 1){
+		a[2].c = chancreate(sizeof(ulong), 0);
+		proccreate(kbdfsio, a[2].c, 2048);
+	}
+
 	/*File save load*/
 	if((savfile= Bopen(filename, OREAD)) != 0){
  		if(loadsave(&Settings, savfile) == 0)
@@ -146,14 +195,7 @@ threadmain(int argc, char** argv){
 		Key = alt(a);
 
 
- 		lockdisplay(display);
-		draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.max.x, screen->r.max.y), bground, nil, ZP);
- 		drawentity(&GEntity, screen, 128, 128);
- 		drawentity(&FEntity, screen, 400,400);
 
-		drawui(&UIface, screen, selentity, 32 , 32);
-		flushimage(display, 1);
-		unlockdisplay(display);
 
 
   		if(Key == 2){
@@ -161,7 +203,7 @@ threadmain(int argc, char** argv){
 				if((savfile = Bopen(filename,OWRITE|OTRUNC)) != 0){
 					quit(savfile, &Settings);
 				} else {
-					fprint(2,"SAVE FAILED COULD NOT OPEN %s\n", filename);
+					fprint(2,"SAVE FAILED: COULD NOT OPEN %s\n", filename);
 					savfile = Bfdopen(1, OWRITE);
 					quit(savfile, &Settings);
 				}
@@ -215,7 +257,14 @@ threadmain(int argc, char** argv){
 		}
 		/*Timer <probably we should define with enums ?>*/
 		if(Key == 3){
-
+	 		lockdisplay(display);
+			draw(screen, Rect(screen->r.min.x, screen->r.min.y, screen->r.max.x, screen->r.max.y), bground, nil, ZP);
+	 		drawentity(&GEntity, screen, 128, 128);
+	 		drawentity(&FEntity, screen, 400,400);
+	
+			drawui(&UIface, screen, selentity, 32 , 32);
+			flushimage(display, 1);
+			unlockdisplay(display);
 		}
 		if(Key == 1){
 			eresized(1);

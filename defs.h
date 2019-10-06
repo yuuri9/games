@@ -6,7 +6,9 @@ typedef struct GEntity GEntity;
 typedef struct statmatrix statmatrix;
 typedef struct Item Item;
 typedef struct Player Player;
-
+typedef struct status status;
+typedef struct Inventory Inventory;
+typedef struct Resistance Resistance;
 
 struct Settings {
 	ulong seed;
@@ -105,27 +107,39 @@ struct statmatrix{
 	uint ran;
 	
 };
-struct GEntity {
-	Tile* pos;
-	uint spriten;
-	Image* sprites[4];
-	statmatrix stt;
-	uint type;
+struct status{
 	uint hp;
 	uint mhp;
 	uint mp;
 	uint mmp;
 	uint exp;
 	uint mexp;
+};
+/*seperate out from entity for chests/buildings etc, item array will require being initialized, may require multiple bitmaps if larger than 64 */
+struct Inventory{
+	/*Slots available, slots filled*/
+	uvlong invslots;
+	uvlong fslots;
+	Item* inventory;
+};
+struct Resistance{
 	ushort ares;
 	uint altres[4];
 	ushort mares;
 	uint maltres[4];
 
-	/*Slots available, slots filled*/
-	uint invslots;
-	uint fslots;
-	Item* inventory[50];
+};
+struct GEntity {
+	Tile* pos;
+	uint spriten;
+	Image* sprites[4];
+	uint type;
+
+	statmatrix;
+	status;
+	Inventory;
+	Resistance;
+
 
 };
 
