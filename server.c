@@ -36,6 +36,9 @@ consfn(void* arg){
 			if((consfd = create(consfil, ORCLOSE|OWRITE, 0660)) < 0)
 				threadexitsall("create failed");
 		}
+
+		sendul(c, 1);
+
 		fprint(consfd, "%d", p[0]);
 
 		/*These Close commands are recommended by the srv (3) manpage, but seem to break*/
@@ -69,61 +72,32 @@ arbiter(void* arg){
 	Channel* in;
 	Channel* ind;
 
-	Settings Settings;
-
-	char* pfil;
-	char* wdir;
-	char* conffil;
-	char* consfil;
-
-	ulong conscod,id;
+	ulong conscod;
 	uint Key;
 
-	Channel* consch;
+	Channel* consch, *consalt;
 	char* conscmd;
 
 
 	in = arg;
-	ind = recvp(arg);
+	ind = recvp(in);
 
-	Settings.seed = recvul(ind);
-	id = recvul(ind);
-	pfil = malloc(sizeof(char*) * (id+1));
-	strncpy(pfil,recvp(in), id);
-	pfil[id] = '\0';
-	
-	id = recvul(ind);
-	wdir = malloc(sizeof(char*) * (id+1));
-	strncpy(wdir, recvp(in),id);
-	wdir[id] = '\0';
-	
-	id = recvul(ind);
-	conffil = malloc(sizeof(char*) * (id+1));
-	strncpy(conffil, recvp(in),id);
-	conffil[id] = '\0';
-	
-	id = recvul(ind);
-	consfil = malloc(sizeof(char*) * (id+1));
-	strncpy(consfil,recvp(in), id);
-	consfil[id] = '\0';
-	
-	
+	consch = recvp(in);
+	consalt = recvp(in);
+	sendp(consch, consalt);
+
+	recvul(consalt);
 	sendul(ind, 1);
 	chanclose(in);
 	chanclose(ind);
 
 	Alt a[] = {
-		{nil,&conscod,CHANRCV},
+		{consalt,&conscod,CHANRCV},
 		{nil,nil,CHANEND},
 
 	};
 
-	consch = chancreate(sizeof(char*),0);
-	a[0].c = chancreate(sizeof(ulong), 0);
-	proccreate(consfn,consch, 2048 );
 
-	sendp(consch, consfil);
-	sendp(consch, a[0].c);
 
 	for(;;){
 		Key = alt(a);
@@ -145,9 +119,10 @@ void
 threadmain(int argc, char** argv){
 
 	/*This, specifically, is magic number bullshit. Sort of, note group semantics are not really clear from the fork (2) page and "fork()" doesn't have RFNOTEG by default, I had to read the CWFS code to get tipped off.*/
-	rfork(RFNOTEG);
+	if(rfork(RFNOTEG) != 0)
+		threadexits(nil);
 	Settings Settings;
-	Channel* nch, *tch;
+	Channel* nch, *tch, *c;
 
 	char* pfil;
 	char* wdir;
@@ -182,22 +157,26 @@ threadmain(int argc, char** argv){
 			break;
 	}ARGEND
 
+
 	nch = chancreate(sizeof(char*),0);
 	tch = chancreate(sizeof(ulong), 0);
 
 	proccreate(arbiter,nch, 2048 );
 	sendp(nch, tch);
-	sendul(tch, Settings.seed);
-	/*Strlen returns long, don't think strings can be longer than the longest long, if argv is not null terminated we have a significantly bigger issue than buffer overflow*/
-	sendul(tch, strlen(pfil));
-	sendp(nch, pfil);
-	sendul(tch, strlen(wdir));
-	sendp(nch, wdir);
-	sendul(tch, strlen(conffil));
-	sendp(nch, conffil);
-	sendul(tch, strlen(consfil));
-	sendp(nch, consfil);
+
+
+	c = chancreate(sizeof(char*),0);
+	proccreate(consfn,c, 2048 );
+	sendp(c, consfil);
+	sendp(nch, c);
+
+	c = chancreate(sizeof(ulong), 0);
+	sendp(nch, c);
+
+	/*Block until args are not needed*/
 	recvul(tch);
+	chanclose(tch);
+	chanclose(nch);
 	threadexits(nil);
 
 }
