@@ -25,7 +25,7 @@ usage(void){
 
 void
 susage(void){
-	fprint(2, "server [-p] playerdb [-w] world/ [-s] seed [-o] console \n");
+	fprint(2, "server [-p] playerdb [-w] world/ [-s] seed [-c] config [-i] service [-o] console \n");
 	threadexitsall(nil);
 }
 
