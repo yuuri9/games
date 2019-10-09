@@ -36,7 +36,7 @@ threadmain(int argc, char** argv){
 	pfil = "db/players.db";
 	wdir = "./";
 	conffil = "./conf.ini";
-	service = "/srv/server";
+	service = "tcp!*!2440";
 
 	ARGBEGIN{
 		case 'p':
@@ -70,6 +70,14 @@ threadmain(int argc, char** argv){
 	c = chancreate(sizeof(char*),0);
 	proccreate(consfn,c, 2048 );
 	sendp(c, consfil);
+	sendp(nch, c);
+
+	c = chancreate(sizeof(ulong), 0);
+	sendp(nch, c);
+
+	c = chancreate(sizeof(char*),0);
+	proccreate(dialarbiter, c, 4096);
+	sendp(c, service);
 	sendp(nch, c);
 
 	c = chancreate(sizeof(ulong), 0);
