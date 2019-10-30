@@ -6,15 +6,26 @@
 #include "procfns.h"
 
 
+
+void
+pop(tocon** tc, int idx){
+	int i;
+	for(i=idx;i<(LISTENERS - 1);++i){
+		tc[i]->pid = tc[i+1]->pid;
+		tc[i]->time = tc[i+1]->time;
+	}
+
+}
+
 void
 timerproc(void* arg){
+	fprint(2, "dong");
 	Channel* c;
 	c = arg;
 
 	for(;;){
-		if(recvul(c) == -1)
-			threadexits(nil);
 		sleep(10);
+		fprint(2, "bong");
 		sendul(c, 1);
 	}
 }
@@ -65,7 +76,7 @@ consfn(void* arg){
 			consinbuf = Brdstr(console, '\n', 1);
 			if(Blinelen(console) > 3 && cistrncmp("halt", consinbuf, 4) == 0){
 				fprint(p[1], "Halting...\n");
-				sendul(c,4);
+				sendul(c,3);
 				sendp(v,"halt");
 				recvul(c);
 				fprint(p[1], "done\n");
@@ -130,10 +141,12 @@ arbiter(void* arg){
 				conscmd = recvp(consch);
 
 
-				if(conscod > 3 && strncmp(conscmd, "halt", 4) == 0){
+				if(conscod == 3 && strncmp(conscmd, "halt", 4) == 0){
 
 					/*Send halts to all threads here*/
-					sendul(dialalt, -1);
+					sendul(dialalt, 3);
+
+
 					sendul(consalt,1);
 					threadexits(nil);
 
@@ -148,7 +161,7 @@ arbiter(void* arg){
 }
 void
 dialarbiter(void* arg){
-	Channel* c, *v;
+ 	Channel* c, *v;
 
 	Channel* lc, *la, *tc;
 
@@ -156,83 +169,111 @@ dialarbiter(void* arg){
 	char adir[40];
 	char buf[512];
 	int afd;
-	uint n, Key;
+	uint n, Key, ndt, i, listn;
+	tocon* dtt = malloc(LISTENERS * sizeof(tocon));
+
 	ulong ar, lr, tr;
 	Biobuf* netprint;
 
-
+	listn = 1;
 	c = arg;
 	service = recvp(c);
 	v = recvp(c);
 	afd = announce(service, adir);
-
+ 
 	/*All references to servers must be completed before signalling ready*/
 	sendul(v,1);
 
 	la = chancreate(sizeof(ulong),0);
-	lc = chancreate(sizeof(char*), 0);
-	proccreate(dialproc, lc, 2048);
-	sendp(lc, la);
+	dtt[0].lc = chancreate(sizeof(char*), 0);
 
-	sendp(lc, &adir);
+	dtt[0].pid = threadcreate(dialthread, dtt[0].lc, 2048);
+	dtt[0].time = 0;
+	sendp(dtt[0].lc, la);
+
+	sendp(dtt[0].lc, &adir);
 
 	tc = chancreate(sizeof(ulong), 0);
-	proccreate(timerproc, tc, 1024);
-	sendul(tc, 1);
-
+ 	proccreate(timerproc, tc, 1024);
+	
+	recvul(tc);
+	fprint(2, "g");
 	Alt a[] = {
 		{v, &ar, CHANRCV},
 		{la, &lr, CHANRCV},
 		{tc, &tr, CHANRCV},
 		{nil,nil,CHANEND},
 	};
+
+
 	for(;;){
 		Key = alt(a);
+		fprint(2, "KEY: %d\n", Key);
 		if(Key == 0){
-			if(ar == -1){
-				/*Send halts to channels*/
-				sendul(la, -1);
-				sendul(tc, -1);
-				close(afd);
+			if(ar == 3){
+				/*Send halts to channels which need/want to exit gracefuly (net/db access), others(timer etc) just kill*/
+				sendul(la, 3);
+				
+ 				close(afd);
 			}
 
 
 		}
 		if(Key == 2){
-			sendul(la, 1);
 
+			if(listn < LISTENERS){
+				dtt[listn].lc = chancreate(sizeof(char*), 0);
+				dtt[listn].pid = threadcreate(dialthread, dtt[listn].lc, 2048);
+				dtt[listn].time = 0;
+				sendp(dtt[listn].lc, la);
+				sendp(dtt[listn].lc, &adir);
+				++listn;
+			}
+			for(i=0;i<listn;++i){
+				fprint(2, "PID: %d TIME: %d \n", dtt[i].pid, dtt[i].time);
+				dtt[i].time += 10;
+				if(dtt[i].time >= LISTENERTIMEOUT){
+					fprint(2, "TIMED OUT: %d\n",dtt[i].pid);
+					chanclose(dtt[i].lc);
 
-			sendul(tc, 1);
-		}
+					threadkill(dtt[i].pid);
+					pop(&dtt, i);
+					--listn;
+				}
+			}
+ 		}
 
 	}
 
 }
 void
-dialproc(void* arg){
+dialthread(void* arg){
 	Channel* c,*v;
 	char* adir, ldir[40];
-	
+	Biobuf* net;
 	int lfd, dfd;
 
 	c = arg;
 	v = recvp(c);
 	adir = recvp(c);
+
 	lfd = listen(adir, ldir);
 	if(lfd <= 0)
 		threadexits(nil);
-
+	fprint(2, "chong\n");
 	dfd = accept(lfd, ldir);
 
+	net = Bfdopen(dfd, OREAD);
+
 	for(;;){
-		if(recvul(v) == -1){
+		if(recvul(v) == 3){
 			close(dfd);
 			close(lfd);
 			threadexits(nil);
 		}
 
 		
-		fprint(dfd, "LOL DONGS\n");
-		
+		fprint(dfd, "LOL DONGS %d\n", dfd);
+		Brdstr(net,'\n',0 );
 	}
 }

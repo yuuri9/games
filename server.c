@@ -76,7 +76,7 @@ threadmain(int argc, char** argv){
 	sendp(nch, c);
 
 	c = chancreate(sizeof(char*),0);
-	proccreate(dialarbiter, c, 4096);
+	proccreate(dialarbiter, c, 8192);
 	sendp(c, service);
 	sendp(nch, c);
 
