@@ -5,15 +5,16 @@ struct tocon {
 	Channel* la;
 	uint pid;
 	uint time;
+	uint conn;
 };
 
 enum{
-	LISTENERS = 1,
-	LISTENERTIMEOUT = 50,
+	LISTENERS = 5,
+	LISTENERTIMEOUT = 50000,
 };
 
 void
-pop(tocon** tc, int idx);
+pop(tocon* tc, int idx, uint listn);
 
 void
 consfn(void* arg);

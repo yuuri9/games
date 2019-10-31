@@ -8,25 +8,22 @@
 
 
 void
-pop(tocon** tc, int idx){
+pop(tocon* tc, int idx, uint listn){
 	int i;
-	for(i=idx;i<(LISTENERS - 1);++i){
-		tc[i]->pid = tc[i+1]->pid;
-		tc[i]->time = tc[i+1]->time;
+	for(i=idx;i<(listn-1);++i){
+		tc[i] = tc[i+1];	
 	}
 
 }
 
 void
 timerproc(void* arg){
-	fprint(2, "dong");
-	Channel* c;
+ 	Channel* c;
 	c = arg;
 
 	for(;;){
 		sleep(10);
-		fprint(2, "bong");
-		sendul(c, 1);
+ 		sendul(c, 1);
 	}
 }
 
@@ -187,18 +184,18 @@ dialarbiter(void* arg){
 	la = chancreate(sizeof(ulong),0);
 	dtt[0].lc = chancreate(sizeof(char*), 0);
 
-	dtt[0].pid = threadcreate(dialthread, dtt[0].lc, 2048);
+	dtt[0].pid = proccreate(dialthread, dtt[0].lc, 2048);
 	dtt[0].time = 0;
+	dtt[0].conn = 0;
 	sendp(dtt[0].lc, la);
 
 	sendp(dtt[0].lc, &adir);
 
 	tc = chancreate(sizeof(ulong), 0);
- 	proccreate(timerproc, tc, 1024);
+  	proccreate(timerproc, tc, 1024);
 	
-	recvul(tc);
-	fprint(2, "g");
-	Alt a[] = {
+ 	recvul(tc);
+ 	Alt a[] = {
 		{v, &ar, CHANRCV},
 		{la, &lr, CHANRCV},
 		{tc, &tr, CHANRCV},
@@ -221,23 +218,25 @@ dialarbiter(void* arg){
 		}
 		if(Key == 2){
 
-			if(listn < LISTENERS){
+			if(listn < LISTENERS  && dtt[listn-1].conn >0){
 				dtt[listn].lc = chancreate(sizeof(char*), 0);
-				dtt[listn].pid = threadcreate(dialthread, dtt[listn].lc, 2048);
+				dtt[listn].pid = proccreate(dialthread, dtt[listn].lc, 2048);
 				dtt[listn].time = 0;
+				dtt[listn].conn = 0;
 				sendp(dtt[listn].lc, la);
 				sendp(dtt[listn].lc, &adir);
 				++listn;
 			}
 			for(i=0;i<listn;++i){
-				fprint(2, "PID: %d TIME: %d \n", dtt[i].pid, dtt[i].time);
+				fprint(2, "PID: %d TIME: %d LISTN: %d\n", dtt[i].pid, dtt[i].time,listn);
 				dtt[i].time += 10;
 				if(dtt[i].time >= LISTENERTIMEOUT){
-					fprint(2, "TIMED OUT: %d\n",dtt[i].pid);
+					fprint(2, "INDEX: %d TIMED OUT: %d\n",i,dtt[i].pid);
 					chanclose(dtt[i].lc);
 
 					threadkill(dtt[i].pid);
-					pop(&dtt, i);
+					fprint(2, "DEAD: %d\n", dtt[i].pid);
+					pop(dtt, i,listn);
 					--listn;
 				}
 			}
