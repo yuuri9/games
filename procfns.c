@@ -284,7 +284,7 @@ dialthread(void* arg){
 	if(lfd <= 0){
 		send(v, &pid);
 		sendp(c, killcmd);
-		threadexits(nil);
+		recvp(c);
 	}
 	dfd = accept(lfd, ldir);
 	net = Bfdopen(dfd, OREAD);
