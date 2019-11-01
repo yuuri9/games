@@ -163,6 +163,7 @@ dialarbiter(void* arg){
 	Channel* lc, *la, *tc;
 
 	char* service;
+	char* cmdrec;
 	char adir[40];
 	char buf[512];
 	int afd;
@@ -172,7 +173,7 @@ dialarbiter(void* arg){
 	ulong ar, lr, tr;
 	Biobuf* netprint;
 
-	listn = 1;
+	listn = 0;
 	c = arg;
 	service = recvp(c);
 	v = recvp(c);
@@ -182,14 +183,8 @@ dialarbiter(void* arg){
 	sendul(v,1);
 
 	la = chancreate(sizeof(ulong),0);
-	dtt[0].lc = chancreate(sizeof(char*), 0);
 
-	dtt[0].pid = proccreate(dialthread, dtt[0].lc, 2048);
-	dtt[0].time = 0;
-	dtt[0].conn = 0;
-	sendp(dtt[0].lc, la);
 
-	sendp(dtt[0].lc, &adir);
 
 	tc = chancreate(sizeof(ulong), 0);
   	proccreate(timerproc, tc, 1024);
@@ -205,7 +200,7 @@ dialarbiter(void* arg){
 
 	for(;;){
 		Key = alt(a);
-		fprint(2, "KEY: %d\n", Key);
+		//fprint(2, "KEY: %d\n", Key);
 		if(Key == 0){
 			if(ar == 3){
 				/*Send halts to channels which need/want to exit gracefuly (net/db access), others(timer etc) just kill*/
@@ -216,26 +211,51 @@ dialarbiter(void* arg){
 
 
 		}
+		if(Key == 1){
+			fprint(2, "PID: %d \n", lr);
+			for(i=0;i<listn;++i){
+				if(dtt[i].pid == lr){
+					cmdrec = recvp(dtt[i].lc);
+					dtt[i].time = 0;
+					if(strncmp(cmdrec, "kill", 4) == 0){
+						fprint(2, "INDEX: %d KILLED ON LISTEN: %d\n",i,dtt[i].pid);
+						chanclose(dtt[i].lc);
+	
+						threadkill(dtt[i].pid);
+						dtt[i].conn = 0;
+						pop(dtt, i,listn);
+						--listn;
+					}
+					else if(strncmp(cmdrec, "conn", 4) == 0){
+						fprint(2, "INDEX: %d CONNECTED PID: %d\n", i, dtt[i].pid);
+						dtt[i].conn = 1;
+					}					
+				}
+			}
+
+		}
 		if(Key == 2){
 
-			if(listn < LISTENERS  && dtt[listn-1].conn >0){
+			if(listn < LISTENERS  && (listn < 1 || dtt[listn-1].conn >0)){
 				dtt[listn].lc = chancreate(sizeof(char*), 0);
 				dtt[listn].pid = proccreate(dialthread, dtt[listn].lc, 2048);
 				dtt[listn].time = 0;
 				dtt[listn].conn = 0;
 				sendp(dtt[listn].lc, la);
 				sendp(dtt[listn].lc, &adir);
+				send(dtt[listn].lc, &dtt[listn].pid);
 				++listn;
 			}
 			for(i=0;i<listn;++i){
-				fprint(2, "PID: %d TIME: %d LISTN: %d\n", dtt[i].pid, dtt[i].time,listn);
+				//fprint(2, "PID: %d TIME: %d LISTN: %d\n", dtt[i].pid, dtt[i].time,listn);
 				dtt[i].time += 10;
 				if(dtt[i].time >= LISTENERTIMEOUT){
-					fprint(2, "INDEX: %d TIMED OUT: %d\n",i,dtt[i].pid);
+					fprint(2, "INDEX: %d TIMED OUT: %d TIME: %d\n",i,dtt[i].pid, dtt[i].time);
 					chanclose(dtt[i].lc);
 
 					threadkill(dtt[i].pid);
-					fprint(2, "DEAD: %d\n", dtt[i].pid);
+				//	fprint(2, "DEAD: %d\n", dtt[i].pid);
+					dtt[i].conn = 0;
 					pop(dtt, i,listn);
 					--listn;
 				}
@@ -248,31 +268,44 @@ dialarbiter(void* arg){
 void
 dialthread(void* arg){
 	Channel* c,*v;
-	char* adir, ldir[40];
+	char* adir, ldir[40], *brdin;
 	Biobuf* net;
 	int lfd, dfd;
+	uint pid;
+	char* killcmd = "kill";
+	char* recvcmd = "conn";
 
 	c = arg;
 	v = recvp(c);
-	adir = recvp(c);
+ 	adir = recvp(c);
+	recv(c, &pid);
 
 	lfd = listen(adir, ldir);
-	if(lfd <= 0)
+	if(lfd <= 0){
+		send(v, &pid);
+		sendp(c, killcmd);
 		threadexits(nil);
-	fprint(2, "chong\n");
+	}
 	dfd = accept(lfd, ldir);
-
 	net = Bfdopen(dfd, OREAD);
 
+	send(v,  &pid);
+	sendp(c, recvcmd);
+
 	for(;;){
-		if(recvul(v) == 3){
+
+		fprint(dfd, "LOL DONGS %d\n", dfd);
+		brdin = Brdstr(net,'\n',0 );
+		fprint(2, "READ: %s IN: %d ON: %d\n", brdin, Blinelen(net), pid);
+		if( Blinelen(net) < 1){
 			close(dfd);
 			close(lfd);
-			threadexits(nil);
-		}
 
-		
-		fprint(dfd, "LOL DONGS %d\n", dfd);
-		Brdstr(net,'\n',0 );
-	}
+			send(v, &pid);
+			sendp(c, killcmd);
+			/*This doesn't ever recieve anything, but it blocks keeping us from continuing to read from the closed network (and thus send repeated kill calls) */
+			recvp(c);
+		}
+		free(brdin);
+ 	}
 }
