@@ -272,25 +272,29 @@ dialthread(void* arg){
 	Biobuf* net;
 	int lfd, dfd;
 	uint pid;
-	char* killcmd = "kill";
-	char* recvcmd = "conn";
+	char* sendcmd;
 
 	c = arg;
 	v = recvp(c);
  	adir = recvp(c);
 	recv(c, &pid);
 
+	sendcmd = (char*)malloc(sizeof(char) * 250);
+
 	lfd = listen(adir, ldir);
 	if(lfd <= 0){
 		send(v, &pid);
-		sendp(c, killcmd);
+		sprint(sendcmd, "%s", "kill");
+
+		sendp(c, sendcmd);
 		recvp(c);
 	}
 	dfd = accept(lfd, ldir);
 	net = Bfdopen(dfd, OREAD);
 
+	sprint(sendcmd, "%s", "conn");
 	send(v,  &pid);
-	sendp(c, recvcmd);
+	sendp(c, sendcmd);
 
 	for(;;){
 
@@ -302,7 +306,10 @@ dialthread(void* arg){
 			close(lfd);
 
 			send(v, &pid);
-			sendp(c, killcmd);
+
+			sprint(sendcmd, "%s", "kill");
+
+			sendp(c, sendcmd);
 			/*This doesn't ever recieve anything, but it blocks keeping us from continuing to read from the closed network (and thus send repeated kill calls) */
 			recvp(c);
 		}
