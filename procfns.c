@@ -229,7 +229,10 @@ dialarbiter(void* arg){
 					else if(strncmp(cmdrec, "conn", 4) == 0){
 						fprint(2, "INDEX: %d CONNECTED PID: %d\n", i, dtt[i].pid);
 						dtt[i].conn = 1;
-					}					
+					}
+			
+
+					free(cmdrec);				
 				}
 			}
 
@@ -278,7 +281,7 @@ dialthread(void* arg){
 	v = recvp(c);
  	adir = recvp(c);
 	recv(c, &pid);
-
+	/*To be free'd in final recieving scope*/
 	sendcmd = (char*)malloc(sizeof(char) * 250);
 
 	lfd = listen(adir, ldir);
